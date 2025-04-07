@@ -1,8 +1,11 @@
 module Main where
 
-import Language.MantLe.Math (evaluate)
+import Language.MantLe.Lexer (Source (Source))
+import Language.MantLe.Parser.Types
 
 main :: IO ()
 main = do
-  res <- evaluate "Sum[x+1, {x,1,3}]"
-  print res
+  file <- readFile "./test.ml"
+  case parse all'tokens () "stdin" $ Source file of
+    Left e -> print e
+    Right res -> mconcat $ map print res

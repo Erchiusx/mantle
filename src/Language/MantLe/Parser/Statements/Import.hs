@@ -1,11 +1,11 @@
 module Language.MantLe.Parser.Statements.Import where
 
-import Text.Parsec (anyToken, many, try)
 import Language.MantLe.Parser.Types
 import Language.MantLe.Types qualified as T
+import Text.Parsec (anyToken, many, try)
 
-newtype Import = Import {
-    mod :: [T.Token]
+newtype Import = Import
+  { mod :: [T.Token]
   }
 
 instance AST'node Import

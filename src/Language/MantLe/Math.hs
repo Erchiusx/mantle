@@ -13,7 +13,10 @@ evaluate expr = runReq defaultHttpConfig $ do
         /: "erchiusjzy"
         /: "plain"
     formData = "x" =: expr
-    options = header "EmbedCode-User-Agent" "EmbedCode-JavaScript/1.0"
+    options =
+      header
+        "EmbedCode-User-Agent"
+        "EmbedCode-JavaScript/1.0"
   res <-
     req
       POST
@@ -21,5 +24,7 @@ evaluate expr = runReq defaultHttpConfig $ do
       (ReqBodyUrlEnc formData)
       bsResponse
       $ options
-        <> header "Content-Type" "application/x-www-form-urlencoded"
+        <> header
+          "Content-Type"
+          "application/x-www-form-urlencoded"
   return $ BU.toString (responseBody res)

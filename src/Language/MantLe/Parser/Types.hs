@@ -1,10 +1,13 @@
 module Language.MantLe.Parser.Types where
 
+import Control.Monad.State
+import Debug.Trace
 import Language.MantLe.Lexer
-import Text.Parsec hiding (parse)
 import Language.MantLe.Types
+import Text.Parsec hiding (State, parse)
 
-type Parser u a = Parsec Source u a
+type Parser u a =
+  ParsecT Source u (State Parser'State) a
 
 parse
   :: Parser u a
@@ -12,10 +15,18 @@ parse
   -> SourceName
   -> Source
   -> Either ParseError a
-parse = runParser
+parse p u name source =
+  evalState (runParserT p u name source) $
+    Parser'State
+      { indent = [0]
+      , exdent = 0
+      }
 
 data AST = forall a. AST'node a => AST'node Period a
 type Period = (SourcePos, SourcePos)
 class AST'node a
 class Statement a where
-  expect :: Parser Parser'State a
+  expect :: Parser () a
+
+all'tokens :: Parser () [Token]
+all'tokens = many anyToken

@@ -4,6 +4,8 @@ module Language.MantLe.Lexer
 where
 
 import Control.Applicative (Alternative ((<|>)))
+import Control.Monad (guard)
+import Control.Monad.State
 import Data.Char (isLetter)
 import Data.List (isPrefixOf)
 import Language.MantLe.Types
@@ -13,44 +15,18 @@ try'prefix
   :: [(String, a)]
   -> String
   -> (a -> Token)
-  -> Maybe (Token, String)
+  -> Maybe (Token, Source)
 try'prefix [] _ _ = Nothing
 try'prefix ((s, k) : rest) src f
-  | s `isPrefixOf` src = Just (f k, drop (length s) $ src)
+  | s `isPrefixOf` src =
+      Just (f k, Source $ drop (length s) $ src)
   | otherwise = try'prefix rest src f
 
 newtype Source = Source
   { text :: String
   }
 
-lex'indent :: String -> Maybe (Token, String)
-lex'indent s = do
-  let
-    ss = dropWhile (== '\n') s
-    (tabs, rest) = break (/= '\t') ss
-    num = length tabs
-  return (Indent num, rest)
-
-instance Monad m => Stream Source m Token where
-  uncons = return . uncons' . trim
-   where
-    trim :: Source -> String
-    trim =
-      let spaces = " \v" :: String
-       in dropWhile (`elem` spaces) . text
-
-    uncons' :: String -> Maybe (Token, Source)
-    uncons' s =
-      (fmap . fmap) Source $
-        lex'comment s
-          <|> lex'indent s
-          <|> lex'symbol s
-          <|> lex'operator s
-          <|> lex'math s
-          <|> lex'keyword s
-          <|> lex'identifier s
-
-lex'keyword :: String -> Maybe (Token, String)
+lex'keyword :: String -> Maybe (Token, Source)
 lex'keyword s = do
   let keywords =
         [ "import"
@@ -63,7 +39,7 @@ lex'keyword s = do
           :: [(String, Keyword)]
   try'prefix keywords s Keyword
 
-lex'symbol :: String -> Maybe (Token, String)
+lex'symbol :: String -> Maybe (Token, Source)
 lex'symbol s = do
   let symbols =
         [ "@"
@@ -75,36 +51,89 @@ lex'symbol s = do
         , "]"
         , "{"
         , "}"
-        , "#"
+        , "."
         ]
           :: [(String, Symbol)]
   try'prefix symbols s Symbol
 
-lex'operator :: String -> Maybe (Token, String)
+lex'operator :: String -> Maybe (Token, Source)
 lex'operator s = do
   let
-    operator'components = "!$%^&*<>/\\:" :: [Char]
+    operator'components = "!$%^&*<>/\\:+-" :: [Char]
     (result, rest) = break (not . (`elem` operator'components)) s
-  return $ (Operator result, rest)
+  guard (result /= "")
+  return $ (Operator result, Source rest)
 
-lex'identifier :: String -> Maybe (Token, String)
-lex'identifier s =
+lex'identifier :: String -> Maybe (Token, Source)
+lex'identifier s = do
   let (identifier, rest) = break (not . isLetter) s
-   in if length identifier == 0
-        then Nothing
-        else Just (Identifier identifier, rest)
+  guard (identifier /= "")
+  return (Identifier identifier, Source rest)
 
-lex'comment :: String -> Maybe (Token, String)
+lex'comment :: String -> Maybe (Token, Source)
 lex'comment s = do
   '-' : '-' : rest <- Just s
   let (comment, rest') = break (== '\n') rest
-  return $ (Comment comment, dropWhile (== '\n') rest')
+  return $
+    (Comment comment, Source $ rest')
 
-lex'math :: String -> Maybe (Token, String)
+lex'math :: String -> Maybe (Token, Source)
 lex'math s = do
   '#' : rest <- Just s
   let (digit, rest') = break stopper rest
-  return $ (Digital digit, rest')
-  where
-    stopper :: Char -> Bool
-    stopper c = elem @[] @Char c "#\n"
+  return $ (Digital digit, Source $ tail rest')
+ where
+  stopper :: Char -> Bool
+  stopper c = elem @[] @Char c "#\n"
+
+spaces :: String
+spaces = " \v"
+
+count :: String -> Char -> (Int, String)
+count [] _ = (0, [])
+count s@(c : cs) c'
+  | c' /= c = (0, s)
+  | otherwise =
+      let (cnt, s) = cs `count` c
+       in (1 + cnt, s)
+
+instance Stream Source (State Parser'State) Token where
+  uncons Source{text = text'} = do
+    -- unemitted exdents
+    p@Parser'State{exdent} <- get
+    if exdent > 0
+      then do
+        put p{exdent = exdent - 1}
+        return $ Just (Layout Exdent, Source text')
+      else do
+        -- empty line
+        let text = dropWhile (`elem` spaces) text'
+        case text of
+          [] -> return Nothing
+          '\n' : text' -> do
+            -- layout
+            let (line, rest) = break (== '\n') text'
+            if (`elem` (" \v\t" :: String)) `all` line
+              then uncons $ Source rest -- a completely empty line
+              else do
+                let (tabs, rest) = text' `count` '\t'
+                p@Parser'State{indent} <- get
+                let prev = head indent
+                case tabs `compare` prev of
+                  LT -> do
+                    let (dropped, indents) = break (<= tabs) indent
+                    put
+                      p{indent = indents, exdent = length dropped - 1}
+                    return $ Just (Layout Exdent, Source rest)
+                  EQ -> return $ Just (Layout Parrallel, Source rest)
+                  GT -> do
+                    put p{indent = tabs : indent}
+                    return $ Just (Layout Indent, Source rest)
+          _ ->
+            return $
+              lex'keyword text
+                <|> lex'comment text
+                <|> lex'symbol text
+                <|> lex'identifier text
+                <|> lex'math text
+                <|> lex'operator text

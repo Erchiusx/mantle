@@ -1,13 +1,10 @@
 module Language.MantLe.Parser.Expr.Type where
 
-import Text.Parsec (getState)
-import Language.MantLe.Types
-import Language.MantLe.Parser.Types
 import Language.MantLe.Parser.Expr.Types
+import Language.MantLe.Parser.Types
+import Language.MantLe.Types
+import Text.Parsec (getState)
 
-
-type'expr :: Parser Parser'State Type'Expr
+type'expr :: Parser () Type'Expr
 type'expr = do
-  Parser'State{indent} <- getState
-  
   return undefined

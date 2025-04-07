@@ -4,7 +4,8 @@ module Language.MantLe.Types
   , Symbol (..)
   , Paren'Type (..)
   , Raw'mma
-  , Parser'State(..)
+  , Parser'State (..)
+  , Layout (..)
   )
 where
 
@@ -18,7 +19,7 @@ data Token
   | Operator String
   | Comment String
   | Symbol Symbol
-  | Indent Int
+  | Layout Layout
   deriving (Eq, Show)
 
 type Raw'mma = String
@@ -68,7 +69,17 @@ instance IsString Symbol where
 instance IsString (String, Symbol) where
   fromString s = (s, fromString s)
 
+-- layout
+data Layout
+  = Indent
+  | Exdent
+  | Parrallel
+  deriving (Show, Eq)
+
+-- state
 data Parser'State
   = Parser'State
   { indent :: [Int]
-  } deriving (Show, Eq)
+  , exdent :: Int
+  }
+  deriving (Show, Eq)

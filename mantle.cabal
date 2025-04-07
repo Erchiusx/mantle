@@ -30,18 +30,19 @@ common languageversion
         RankNTypes
         RecordWildCards
         ScopedTypeVariables
-        TypeApplications
         TupleSections
+        TypeApplications
 
 common depends
     build-depends:
         , aeson
         , base
-        , text
-        , transformers
+        , bytestring
+        , mtl
         , parsec
         , req
-        , bytestring
+        , text
+        , transformers
         , utf8-string
 
 common warnings
@@ -52,17 +53,17 @@ common modules
         Language.MantLe.Lexer
         Language.MantLe.Math
         Language.MantLe.Parser
-        Language.MantLe.Types
-        Language.MantLe.Parser.Types
-        Language.MantLe.Parser.Token
-        Language.MantLe.Parser.Statements.Import
+        Language.MantLe.Parser.Expr.Type
+        Language.MantLe.Parser.Expr.Types
+        Language.MantLe.Parser.Expr.Val
+        Language.MantLe.Parser.Statements.Class
         Language.MantLe.Parser.Statements.Declare
         Language.MantLe.Parser.Statements.Equation
+        Language.MantLe.Parser.Statements.Import
         Language.MantLe.Parser.Statements.Object
-        Language.MantLe.Parser.Statements.Class
-        Language.MantLe.Parser.Expr.Types
-        Language.MantLe.Parser.Expr.Type
-        Language.MantLe.Parser.Expr.Val
+        Language.MantLe.Parser.Token
+        Language.MantLe.Parser.Types
+        Language.MantLe.Types
 
 executable mantle
     import:         warnings
