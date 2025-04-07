@@ -1,0 +1,73 @@
+cabal-version:   3.0
+name:            mantle
+version:         0.1.0.0
+
+-- synopsis:
+-- description:
+license:         MIT
+license-file:    LICENSE
+author:          Erchius
+maintainer:      erchius_jzy@mail.ustc.edu.cn
+
+-- copyright:
+category:        Language
+build-type:      Simple
+extra-doc-files: CHANGELOG.md
+
+-- extra-source-files:
+
+common languageversion
+    default-language:   GHC2021
+    default-extensions:
+        AllowAmbiguousTypes
+        DataKinds
+        DeriveGeneric
+        DuplicateRecordFields
+        ExistentialQuantification
+        ImportQualifiedPost
+        OverloadedRecordDot
+        OverloadedStrings
+        RankNTypes
+        RecordWildCards
+        ScopedTypeVariables
+        TypeApplications
+        TupleSections
+
+common depends
+    build-depends:
+        , aeson
+        , base
+        , text
+        , transformers
+        , parsec
+        , req
+        , bytestring
+        , utf8-string
+
+common warnings
+    ghc-options: -Wall -Wno-name-shadowing -Wno-unused-do-bind
+
+common modules
+    other-modules:
+        Language.MantLe.Lexer
+        Language.MantLe.Math
+        Language.MantLe.Parser
+        Language.MantLe.Types
+        Language.MantLe.Parser.Types
+        Language.MantLe.Parser.Token
+        Language.MantLe.Parser.Statements.Import
+        Language.MantLe.Parser.Statements.Declare
+        Language.MantLe.Parser.Statements.Equation
+        Language.MantLe.Parser.Statements.Object
+        Language.MantLe.Parser.Statements.Class
+        Language.MantLe.Parser.Expr.Types
+        Language.MantLe.Parser.Expr.Type
+        Language.MantLe.Parser.Expr.Val
+
+executable mantle
+    import:         warnings
+    import:         depends
+    import:         modules
+    import:         languageversion
+    main-is:        Main.hs
+    hs-source-dirs: src
