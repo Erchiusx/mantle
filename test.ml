@@ -1,1 +1,1 @@
-forall x f. Functor f x => x -> f x
+forall x y f. Class f (y->x) x => y -> f x

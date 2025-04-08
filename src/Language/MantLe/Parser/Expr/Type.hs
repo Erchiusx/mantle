@@ -19,6 +19,13 @@ type'expr =
     <|> try pADT
     <|> try pVar
 
+type'expr'nofn :: Parser u Type'Expr
+type'expr'nofn =
+  try pForall
+    <|> try pExists
+    <|> try pFn
+    <|> try pSimpleType
+
 pVar :: Parser u Type'Expr
 pVar = do
   Identifier name <- anyToken
@@ -57,7 +64,7 @@ pConstraints :: Parser u [Constraint]
 pConstraints = many $ try $ do
   Symbol Dot <- anyToken
   Identifier classname <- anyToken
-  types <- many type'expr
+  types <- many type'expr'nofn
   return $
     Constraint (T.Class $ Identifier classname) types
 
@@ -68,7 +75,7 @@ pADT = do
   pure (Type'App t1 t2)
 
 pSimpleType :: Parser u Type'Expr
-pSimpleType = pVar <|> parens type'expr
+pSimpleType = try pVar <|> parens type'expr
 
 parens :: Parser u a -> Parser u a
 parens p = do
