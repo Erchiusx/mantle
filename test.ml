@@ -1,9 +1,1 @@
-import Language.MantLe.Test
-
-text @ some -> text
-text <- show t
-	indented + #1#
-		indent more
-
-otherdef @ some -> text
-otherdef <- Test
+forall x f. Functor f x => x -> f x

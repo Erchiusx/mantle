@@ -42,6 +42,7 @@ common depends
         , parsec
         , req
         , text
+        , these
         , transformers
         , utf8-string
 
@@ -50,6 +51,8 @@ common warnings
 
 common modules
     other-modules:
+        Language.MantLe.Backend.MMA.Codegen
+        Language.MantLe.Backend.MMA.Types
         Language.MantLe.Lexer
         Language.MantLe.Math
         Language.MantLe.Parser

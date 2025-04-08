@@ -26,11 +26,18 @@ type Raw'mma = String
 
 data Keyword
   = Import
-  | Where
+  | Let
+  | In
   | Object
   | Class
   | Forall
   | Exists
+  | Case
+  | Of
+  | If
+  | Else
+  | Then
+  | Data
   deriving (Eq, Show, Read)
 
 instance IsString (String, Keyword) where
@@ -42,9 +49,13 @@ instance IsString (String, Keyword) where
 data Symbol
   = Type'Note
   | Bind'to
-  | Constraint
+  | Constraint'symbol
   | Dot
   | Paren Paren'Type Bool
+  | Branch
+  | Map'to
+  | Lambda
+  | TApp
   deriving (Eq, Show)
 
 data Paren'Type
@@ -54,9 +65,9 @@ data Paren'Type
   deriving (Eq, Show)
 
 instance IsString Symbol where
-  fromString "@" = Type'Note
+  fromString "::" = Type'Note
   fromString "<-" = Bind'to
-  fromString "=>" = Constraint
+  fromString "=>" = Constraint'symbol
   fromString "(" = Paren Round False
   fromString ")" = Paren Round True
   fromString "[" = Paren Bracket False
@@ -64,6 +75,10 @@ instance IsString Symbol where
   fromString "{" = Paren Brace False
   fromString "}" = Paren Brace True
   fromString "." = Dot
+  fromString "|" = Branch
+  fromString "->" = Map'to
+  fromString "\\" = Lambda
+  fromString "@" = TApp
   fromString _ = undefined
 
 instance IsString (String, Symbol) where

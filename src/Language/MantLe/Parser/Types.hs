@@ -1,7 +1,6 @@
 module Language.MantLe.Parser.Types where
 
 import Control.Monad.State
-import Debug.Trace
 import Language.MantLe.Lexer
 import Language.MantLe.Types
 import Text.Parsec hiding (State, parse)
@@ -26,7 +25,7 @@ data AST = forall a. AST'node a => AST'node Period a
 type Period = (SourcePos, SourcePos)
 class AST'node a
 class Statement a where
-  expect :: Parser () a
+  expect :: Parser u a
 
-all'tokens :: Parser () [Token]
+all'tokens :: Parser u [Token]
 all'tokens = many anyToken

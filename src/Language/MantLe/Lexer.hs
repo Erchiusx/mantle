@@ -30,11 +30,18 @@ lex'keyword :: String -> Maybe (Token, Source)
 lex'keyword s = do
   let keywords =
         [ "import"
-        , "where"
+        , "let"
+        , "in"
         , "object"
         , "class"
         , "forall"
         , "exists"
+        , "case"
+        , "of"
+        , "if"
+        , "else"
+        , "then"
+        , "data"
         ]
           :: [(String, Keyword)]
   try'prefix keywords s Keyword
@@ -42,7 +49,7 @@ lex'keyword s = do
 lex'symbol :: String -> Maybe (Token, Source)
 lex'symbol s = do
   let symbols =
-        [ "@"
+        [ "::"
         , "<-"
         , "=>"
         , "("
@@ -52,6 +59,10 @@ lex'symbol s = do
         , "{"
         , "}"
         , "."
+        , "|"
+        , "->"
+        , "\\"
+        , "@"
         ]
           :: [(String, Symbol)]
   try'prefix symbols s Symbol
@@ -59,14 +70,15 @@ lex'symbol s = do
 lex'operator :: String -> Maybe (Token, Source)
 lex'operator s = do
   let
-    operator'components = "!$%^&*<>/\\:+-" :: [Char]
+    operator'components = "!$%^&*<>/+-=" :: [Char]
     (result, rest) = break (not . (`elem` operator'components)) s
   guard (result /= "")
   return $ (Operator result, Source rest)
 
 lex'identifier :: String -> Maybe (Token, Source)
 lex'identifier s = do
-  let (identifier, rest) = break (not . isLetter) s
+  let (identifier, rest) =
+        break (\c -> not (isLetter c) && not (c == '_')) s
   guard (identifier /= "")
   return (Identifier identifier, Source rest)
 
@@ -79,12 +91,16 @@ lex'comment s = do
 
 lex'math :: String -> Maybe (Token, Source)
 lex'math s = do
-  '#' : rest <- Just s
-  let (digit, rest') = break stopper rest
-  return $ (Digital digit, Source $ tail rest')
+  '#' : '@' : rest <- Just s
+  let (formula, rest') = continue ("", rest)
+  return $ (Digital formula, Source rest')
  where
-  stopper :: Char -> Bool
-  stopper c = elem @[] @Char c "#\n"
+  continue :: (String, String) -> (String, String)
+  continue (consumed, '@' : '#' : rest) = (consumed, rest)
+  continue (consumed, '@' : '\n' : rest) = (consumed, '\n' : rest)
+  continue (consumed, '\n' : rest) = (consumed, '\n' : rest)
+  continue (consumed, []) = (consumed, [])
+  continue (consumed, c : cs) = continue (consumed ++ [c], cs)
 
 spaces :: String
 spaces = " \v"
@@ -131,7 +147,8 @@ instance Stream Source (State Parser'State) Token where
                     return $ Just (Layout Indent, Source rest)
           _ ->
             return $
-              lex'keyword text
+              fail ""
+                <|> lex'keyword text
                 <|> lex'comment text
                 <|> lex'symbol text
                 <|> lex'identifier text
