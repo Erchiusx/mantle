@@ -32,6 +32,7 @@ common languageversion
         ScopedTypeVariables
         TupleSections
         TypeApplications
+        PatternSynonyms 
 
 common depends
     build-depends:
@@ -56,6 +57,7 @@ common modules
         Language.MantLe.Lexer
         Language.MantLe.Math
         Language.MantLe.Parser
+        Language.MantLe.Parser.Expr.Pattern
         Language.MantLe.Parser.Expr.Type
         Language.MantLe.Parser.Expr.Types
         Language.MantLe.Parser.Expr.Val

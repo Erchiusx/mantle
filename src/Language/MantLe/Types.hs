@@ -6,6 +6,8 @@ module Language.MantLe.Types
   , Raw'mma
   , Parser'State (..)
   , Layout (..)
+  , pattern Open
+  , pattern Close
   )
 where
 
@@ -64,6 +66,11 @@ data Paren'Type
   | Brace
   deriving (Eq, Show)
 
+pattern Open :: Bool
+pattern Open = False
+pattern Close :: Bool
+pattern Close = True
+
 instance IsString Symbol where
   fromString "::" = Type'Note
   fromString "<-" = Bind'to
@@ -88,7 +95,7 @@ instance IsString (String, Symbol) where
 data Layout
   = Indent
   | Exdent
-  | Parrallel
+  | Parallel
   deriving (Show, Eq)
 
 -- state

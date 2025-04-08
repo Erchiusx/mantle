@@ -9,22 +9,34 @@ import Language.MantLe.Types
   , Symbol (..)
   , Token (..)
   )
-import Text.Parsec (anyToken, many, try, (<|>))
+import Text.Parsec
+  ( anyToken
+  , choice
+  , many
+  , try
+  , (<|>)
+  )
 
 type'expr :: Parser u Type'Expr
 type'expr =
-  try pForall
-    <|> try pExists
-    <|> try pFn
-    <|> try pADT
-    <|> try pVar
+  choice $
+    map try $
+      [ pForall
+      , pExists
+      , pFn
+      , pADT
+      , pVar
+      ]
 
 type'expr'nofn :: Parser u Type'Expr
 type'expr'nofn =
-  try pForall
-    <|> try pExists
-    <|> try pFn
-    <|> try pSimpleType
+  choice $
+    map try $
+      [ pForall
+      , pExists
+      , pFn
+      , pSimpleType
+      ]
 
 pVar :: Parser u Type'Expr
 pVar = do

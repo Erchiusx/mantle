@@ -8,6 +8,8 @@ import Language.MantLe.Types
   , Raw'mma
   , Symbol (Paren)
   , Token (Symbol)
+  , pattern Open
+  , pattern Close
   )
 import Text.Parsec (anyToken, (<?>))
 
@@ -76,9 +78,9 @@ newtype Kind = Kind Int
 
 paren'enclosed :: Parser u a -> Parser u a
 paren'enclosed p = do
-  Symbol (Paren paren'type False) <- anyToken
+  Symbol (Paren paren'type Open) <- anyToken
   res <- p
-  Symbol (Paren paren'type' True) <- anyToken
+  Symbol (Paren paren'type' Close) <- anyToken
   guard (paren'type == paren'type')
     <?> "unmatched parens"
   return res

@@ -141,7 +141,7 @@ instance Stream Source (State Parser'State) Token where
                     put
                       p{indent = indents, exdent = length dropped - 1}
                     return $ Just (Layout Exdent, Source rest)
-                  EQ -> return $ Just (Layout Parrallel, Source rest)
+                  EQ -> return $ Just (Layout Parallel, Source rest)
                   GT -> do
                     put p{indent = tabs : indent}
                     return $ Just (Layout Indent, Source rest)
