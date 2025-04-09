@@ -21,11 +21,23 @@ parse p u name source =
       , exdent = 0
       }
 
-data AST = forall a. AST'node a => AST'node Period a
-type Period = (SourcePos, SourcePos)
-class AST'node a
 class Statement a where
   expect :: Parser u a
 
 all'tokens :: Parser u [Token]
 all'tokens = many anyToken
+
+may'indent :: Parser u a -> Parser u a
+may'indent p = indented p <|> p
+ where
+  indented :: Parser u a -> Parser u a
+  indented p = do
+    Layout Indent <- anyToken
+    res <- may'indent p
+    Layout Exdent <- anyToken
+    return res
+
+parallel :: Parser u ()
+parallel = try $ do
+  Layout Parallel <- anyToken
+  return ()

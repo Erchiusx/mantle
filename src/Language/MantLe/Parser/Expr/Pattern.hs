@@ -1,13 +1,19 @@
 module Language.MantLe.Parser.Expr.Pattern (pattern') where
 
+import Data.These
 import Language.MantLe.Parser.Expr.Types
 import Language.MantLe.Parser.Types
-import Text.Parsec( choice, try, (<|>), anyToken, many )
 import Language.MantLe.Types
-import Data.These
+import Text.Parsec
+  ( anyToken
+  , choice
+  , many
+  , try
+  , (<|>)
+  )
 
 pattern' :: Parser u Pattern
-pattern' = 
+pattern' =
   choice $
     map try' $
       [ syn
@@ -35,7 +41,8 @@ branch = do
   Identifier branch'name <- anyToken
   patterns <- many $ try pattern'
   Symbol (Paren Round Close) <- anyToken
-  return . Pattern $ That (Identifier branch'name, patterns)
+  return . Pattern $
+    That (Identifier branch'name, patterns)
 
 syn :: Parser u Pattern
 syn = do
@@ -43,4 +50,3 @@ syn = do
   Symbol TApp <- anyToken
   Pattern (That branch') <- branch
   return . Pattern $ These name' branch'
-

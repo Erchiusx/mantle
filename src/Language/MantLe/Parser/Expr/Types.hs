@@ -8,8 +8,8 @@ import Language.MantLe.Types
   , Raw'mma
   , Symbol (Paren)
   , Token (Symbol)
-  , pattern Open
   , pattern Close
+  , pattern Open
   )
 import Text.Parsec (anyToken, (<?>))
 

@@ -1,11 +1,19 @@
 module Language.MantLe.Parser.Expr.Val where
 
-import Language.MantLe.Parser.Expr.Types
+import Language.MantLe.Parser.Expr.Pattern
+  ( pattern'
+  )
 import Language.MantLe.Parser.Expr.Type
+import Language.MantLe.Parser.Expr.Types
 import Language.MantLe.Parser.Types
-import Text.Parsec (many, choice, try, sepBy, anyToken, (<|>))
 import Language.MantLe.Types
-import Language.MantLe.Parser.Expr.Pattern (pattern')
+import Text.Parsec
+  ( anyToken
+  , choice
+  , many
+  , sepBy
+  , try
+  )
 
 val'expr :: Parser u Val'Expr
 val'expr =
@@ -28,11 +36,6 @@ p'let'in = do
   Layout Exdent <- anyToken
   value <- may'indent val'expr
   return $ Val'Let bindings value
-
-parallel :: Parser u ()
-parallel = do
-  Layout Parallel <- anyToken
-  return ()
 
 binding :: Parser u (Pattern, Val'Expr)
 binding = do
@@ -58,16 +61,6 @@ branch = do
   value <- val'expr
   return (p, value)
 
-may'indent :: Parser u a -> Parser u a
-may'indent p = indented p <|> p
- where
-  indented :: Parser u a -> Parser u a
-  indented p = do
-    Layout Indent <- anyToken
-    res <- may'indent p
-    Layout Exdent <- anyToken
-    return res
-
 p'lambda :: Parser u Val'Expr
 p'lambda = do
   Symbol Lambda <- anyToken
@@ -90,10 +83,12 @@ p'application = do
   return $ Val'App f x
 
 component :: Parser u Val'Expr
-component = choice $ map try $
-  [ paren'enclosed val'expr
-  , p'plain
-  ]
+component =
+  choice $
+    map try $
+      [ paren'enclosed val'expr
+      , p'plain
+      ]
 
 p'plain :: Parser u Val'Expr
 p'plain = do

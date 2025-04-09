@@ -27,12 +27,12 @@ common languageversion
         ImportQualifiedPost
         OverloadedRecordDot
         OverloadedStrings
+        PatternSynonyms
         RankNTypes
         RecordWildCards
         ScopedTypeVariables
         TupleSections
         TypeApplications
-        PatternSynonyms 
 
 common depends
     build-depends:
@@ -42,6 +42,7 @@ common depends
         , mtl
         , parsec
         , req
+        , split
         , text
         , these
         , transformers
@@ -61,7 +62,9 @@ common modules
         Language.MantLe.Parser.Expr.Type
         Language.MantLe.Parser.Expr.Types
         Language.MantLe.Parser.Expr.Val
+        Language.MantLe.Parser.Statements.Binding
         Language.MantLe.Parser.Statements.Class
+        Language.MantLe.Parser.Statements.Data
         Language.MantLe.Parser.Statements.Declare
         Language.MantLe.Parser.Statements.Equation
         Language.MantLe.Parser.Statements.Import

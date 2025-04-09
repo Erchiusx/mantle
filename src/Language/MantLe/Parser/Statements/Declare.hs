@@ -10,8 +10,8 @@ data Declare = Declare
   { name :: String
   , datatype :: Type'Expr
   }
+  deriving (Show, Eq)
 
-instance AST'node Declare
 instance Statement Declare where
   expect = try $ do
     T.Identifier name <- anyToken

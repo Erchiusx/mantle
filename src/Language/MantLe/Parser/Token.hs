@@ -3,11 +3,13 @@ module Language.MantLe.Parser.Token where
 import Language.MantLe.Parser.Types
 import Language.MantLe.Types
 import Text.Parsec
-  ( anyToken
+  ( SourcePos
+  , anyToken
   , getPosition
   )
 
-period :: Parser u a -> Parser u (Period, a)
+period
+  :: Parser u a -> Parser u ((SourcePos, SourcePos), a)
 period p = do
   pos <- getPosition
   res <- p
