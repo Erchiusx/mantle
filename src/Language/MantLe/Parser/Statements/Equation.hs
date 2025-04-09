@@ -1,4 +1,3 @@
-{-# OPTIONS_GHC -Wno-incomplete-uni-patterns #-}
 module Language.MantLe.Parser.Statements.Equation (Equation (..)) where
 
 import Control.Monad (guard)
@@ -22,8 +21,8 @@ instance Statement Equation where
     guard $ Operator "=" `elem` os
     let parts = os `splitOn` [Operator "="]
     guard $ length parts == 2
+    first : second : [] <- return parts
     let
-      first : second : [] = parts
       (left, right) =
         splitAt (length first + 1) vs
       lhs = Val'Formula first left

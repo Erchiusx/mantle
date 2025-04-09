@@ -1,6 +1,5 @@
 module Language.MantLe.Parser.Statements.Object where
 
-import Language.MantLe.Parser.Expr.Types
 import Language.MantLe.Parser.Types
 import Language.MantLe.Types qualified as T
 import Text.Parsec (anyToken)
