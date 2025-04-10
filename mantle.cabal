@@ -68,6 +68,7 @@ common modules
         Language.MantLe.Parser.Statements.Declare
         Language.MantLe.Parser.Statements.Equation
         Language.MantLe.Parser.Statements.Import
+        Language.MantLe.Parser.Statements.Instance
         Language.MantLe.Parser.Statements.Object
         Language.MantLe.Parser.Token
         Language.MantLe.Parser.Types

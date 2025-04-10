@@ -40,6 +40,7 @@ data Keyword
   | Else
   | Then
   | Data
+  | Instance
   deriving (Eq, Show, Read)
 
 instance IsString (String, Keyword) where
