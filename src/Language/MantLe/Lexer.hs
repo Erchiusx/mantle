@@ -42,6 +42,7 @@ lex'keyword s = do
         , "else"
         , "then"
         , "data"
+        , "instance"
         ]
           :: [(String, Keyword)]
   try'prefix keywords s Keyword
