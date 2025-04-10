@@ -1,1 +1,3 @@
-forall x y f. Class f (y->x) x => y -> f x
+let
+	x <- '1'
+in x

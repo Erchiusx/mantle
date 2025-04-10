@@ -1,7 +1,6 @@
 module Language.MantLe.Parser.Expr.Type (type'expr) where
 
 import Language.MantLe.Parser.Expr.Types
-import Language.MantLe.Parser.Expr.Types qualified as T
 import Language.MantLe.Parser.Types
 import Language.MantLe.Types
   ( Keyword (..)
@@ -78,7 +77,7 @@ pConstraints = many $ try $ do
   Identifier classname <- anyToken
   types <- many type'expr'nofn
   return $
-    Constraint (T.Class $ Identifier classname) types
+    Constraint (Identifier classname) types
 
 pADT :: Parser u Type'Expr
 pADT = do

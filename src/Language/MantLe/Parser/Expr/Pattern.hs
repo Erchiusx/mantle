@@ -22,7 +22,7 @@ pattern' =
       ]
 
 try' :: Parser u a -> Parser u a
-try' p = enclosed <|> p
+try' p = enclosed <|> try p
  where
   enclosed = try $ do
     Symbol (Paren Round Open) <- anyToken

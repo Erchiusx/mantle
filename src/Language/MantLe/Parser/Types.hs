@@ -13,9 +13,9 @@ parse
   -> u
   -> SourceName
   -> Source
-  -> Either ParseError a
+  -> (Either ParseError a, Parser'State)
 parse p u name source =
-  evalState (runParserT p u name source) $
+  runState (runParserT p u name source) $
     Parser'State
       { indent = [0]
       , exdent = 0
@@ -31,7 +31,7 @@ may'indent :: Parser u a -> Parser u a
 may'indent p = indented p <|> p
  where
   indented :: Parser u a -> Parser u a
-  indented p = do
+  indented p = try $ do
     Layout Indent <- anyToken
     res <- may'indent p
     Layout Exdent <- anyToken

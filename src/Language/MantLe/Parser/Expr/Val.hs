@@ -11,20 +11,21 @@ import Text.Parsec
   ( anyToken
   , choice
   , many
-  , sepBy
+  , many1
+  , optional
   , try
+  , (<|>)
   )
 
-val'expr :: Parser u Val'Expr
-val'expr =
+val'expr' :: Parser u Val'Expr
+val'expr' =
   choice $
     map try $
-      [ p'formula
+      [ p'application
       , p'case'of
       , p'let'in
       , p'type'application
       , p'lambda
-      , p'application
       , p'plain
       ]
 
@@ -32,15 +33,16 @@ p'let'in :: Parser u Val'Expr
 p'let'in = do
   Keyword Let <- anyToken
   Layout Indent <- anyToken
-  bindings <- try binding `sepBy` try parallel
-  Layout Exdent <- anyToken
+  bindings <-
+    many $ try (binding <* optional parallel)
+  Keyword In <- anyToken
   value <- may'indent val'expr
-  return $ Val'Let bindings value
+  return $ Val'Let (bindings) value
 
 binding :: Parser u (Pattern, Val'Expr)
 binding = do
   p <- pattern'
-  Operator "=" <- anyToken
+  Symbol Bind'to <- anyToken
   value <- val'expr
   return (p, value)
 
@@ -50,7 +52,7 @@ p'case'of = do
   value <- val'expr
   Keyword Of <- anyToken
   Layout Indent <- anyToken
-  branches <- try branch `sepBy` try parallel
+  branches <- many $ try (branch <* parallel)
   Layout Exdent <- anyToken
   return $ Val'Match value branches
 
@@ -71,7 +73,7 @@ p'lambda = do
 
 p'type'application :: Parser u Val'Expr
 p'type'application = do
-  value <- val'expr
+  value <- p'plain
   Symbol TApp <- anyToken
   type' <- type'expr
   return $ Val'Sig value type'
@@ -79,8 +81,8 @@ p'type'application = do
 p'application :: Parser u Val'Expr
 p'application = do
   f <- component
-  x <- val'expr
-  return $ Val'App f x
+  rest <- many1 component
+  return $ foldl' Val'App f rest
 
 component :: Parser u Val'Expr
 component =
@@ -98,17 +100,32 @@ p'plain = do
     Identifier _ -> return $ Val'Var t
     _ -> fail "error parsing expression"
 
-p'formula :: Parser u Val'Expr
-p'formula = do
-  co <- many $ try $ do
-    c <- component
-    o <- any'operator
-    return (c, o)
-  c <- component
-  let (c', o) = traverse (\(x, y) -> ([x], y)) co
-  return $ Val'Formula o $ c' ++ [c]
-
 any'operator :: Parser u Token
 any'operator = do
   o@(Operator _) <- anyToken
   return o
+
+fcomponent :: Parser u Val'Expr
+fcomponent =
+  choice $
+    map try $
+      [ paren'enclosed val'expr
+      , p'application
+      , p'plain
+      ]
+
+val'expr :: Parser u Val'Expr
+val'expr =
+  ( try $ do
+      co <- many1 $ try $ do
+        c <- fcomponent
+        o <- any'operator
+        return (c, o)
+      c <- fcomponent
+      if length co == 0
+        then return c
+        else do
+          let (c', o) = traverse (\(x, y) -> ([x], y)) co
+          return $ Val'Formula o $ c' ++ [c]
+  )
+    <|> val'expr'

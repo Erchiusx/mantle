@@ -24,10 +24,12 @@ common languageversion
         DeriveGeneric
         DuplicateRecordFields
         ExistentialQuantification
+        FunctionalDependencies
         ImportQualifiedPost
         OverloadedRecordDot
         OverloadedStrings
         PatternSynonyms
+        QuasiQuotes
         RankNTypes
         RecordWildCards
         ScopedTypeVariables
@@ -39,6 +41,7 @@ common depends
         , aeson
         , base
         , bytestring
+        , interpolate
         , mtl
         , parsec
         , req

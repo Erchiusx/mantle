@@ -8,6 +8,7 @@ import Control.Monad (guard)
 import Control.Monad.State
 import Data.Char (isLetter)
 import Data.List (isPrefixOf)
+import Data.String (IsString (..))
 import Language.MantLe.Types
 import Text.Parsec (Stream (uncons))
 
@@ -25,6 +26,9 @@ try'prefix ((s, k) : rest) src f
 newtype Source = Source
   { text :: String
   }
+
+instance IsString Source where
+  fromString s = Source s
 
 lex'keyword :: String -> Maybe (Token, Source)
 lex'keyword s = do
@@ -92,16 +96,16 @@ lex'comment s = do
 
 lex'math :: String -> Maybe (Token, Source)
 lex'math s = do
-  '#' : '@' : rest <- Just s
-  let (formula, rest') = continue ("", rest)
-  return $ (Digital formula, Source rest')
+  '\'' : rest <- Just s
+  let (formula, rest') = break stopper rest
+  return $ (Digital formula, Source $ strip rest')
  where
-  continue :: (String, String) -> (String, String)
-  continue (consumed, '@' : '#' : rest) = (consumed, rest)
-  continue (consumed, '@' : '\n' : rest) = (consumed, '\n' : rest)
-  continue (consumed, '\n' : rest) = (consumed, '\n' : rest)
-  continue (consumed, []) = (consumed, [])
-  continue (consumed, c : cs) = continue (consumed ++ [c], cs)
+  stopper :: Char -> Bool
+  stopper c = c `elem` ("'\n" :: String)
+
+  strip :: String -> String
+  strip ('\'' : ss) = ss
+  strip s = s
 
 spaces :: String
 spaces = " \v"

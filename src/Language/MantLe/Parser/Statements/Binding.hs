@@ -8,7 +8,7 @@ import Text.Parsec (anyToken, choice, try)
 
 data Binding = Binding
   { name :: T.Token
-  , datatype :: Val'Expr
+  , value :: Val'Expr
   }
   deriving (Show, Eq)
 

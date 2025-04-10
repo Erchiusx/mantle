@@ -1,14 +1,13 @@
 module Language.MantLe.Parser.Statements.Class where
 
 import Language.MantLe.Parser.Statements.Declare
+import Language.MantLe.Parser.Statements.Equation qualified as Equation
 import Language.MantLe.Parser.Types
   ( Statement (expect)
   , parallel
   )
 import Language.MantLe.Types qualified as T
 import Text.Parsec (anyToken, many, sepBy, try)
-import Language.MantLe.Parser.Statements.Equation qualified as Equation
-
 
 data Class
   = Class

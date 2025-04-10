@@ -1,4 +1,12 @@
-module Language.MantLe.Parser.Expr.Types where
+module Language.MantLe.Parser.Expr.Types
+  ( Val'Expr (..)
+  , Type'Expr (..)
+  , Pattern (..)
+  , enclosed
+  , paren'enclosed
+  , Constraint (..)
+  )
+where
 
 import Control.Monad (guard)
 import Data.These
@@ -67,14 +75,9 @@ data Pattern
 
 data Constraint
   = Constraint
-      Class
+      Token
       [Type'Expr]
   deriving (Show, Eq)
-
-data Class = Class Token
-  deriving (Show, Eq)
-
-newtype Kind = Kind Int
 
 paren'enclosed :: Parser u a -> Parser u a
 paren'enclosed p = do
