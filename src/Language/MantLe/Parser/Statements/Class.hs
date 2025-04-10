@@ -7,12 +7,15 @@ import Language.MantLe.Parser.Types
   )
 import Language.MantLe.Types qualified as T
 import Text.Parsec (anyToken, many, sepBy, try)
+import Language.MantLe.Parser.Statements.Equation qualified as Equation
+
 
 data Class
   = Class
   { types :: [T.Token] -- type identifiers
   , name :: T.Token
   , functions :: [Declare] -- accompanied functions
+  , relations :: [Equation.Equation]
   }
 
 instance Statement Class where
@@ -25,5 +28,11 @@ instance Statement Class where
     T.Layout T.Indent <- anyToken
     functions <-
       try (expect @Declare) `sepBy` parallel
-    T.Layout T.Exdent <- anyToken
-    return $ Class types name functions
+    T.Layout layout <- anyToken
+    case layout of
+      T.Exdent -> return $ Class types name functions []
+      T.Parallel -> do
+        relations <-
+          try (expect @Equation.Equation) `sepBy` parallel
+        return $ Class types name functions relations
+      T.Indent -> fail "indentation"
