@@ -11,6 +11,7 @@ module Main where
 -- import Language.MantLe.Parser.Expr.Val
 -- import Language.MantLe.Parser.Types
 import Language.MantLe.Types (Token (Identifier))
+
 -- import System.Environment
 -- import Text.Parsec (anyToken, many, try)
 import Language.MantLe.Backend.Loader
@@ -18,5 +19,6 @@ import Language.MantLe.Parser.Statements.Import
 
 main :: IO ()
 main = do
-  loaded <- load'module'rec $ Import [Identifier "core"]
+  loaded <-
+    load'module'rec $ Import [Identifier "core"]
   print loaded

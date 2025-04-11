@@ -2,12 +2,12 @@ module Language.MantLe.Parser
   ( file
   , Stmt (..)
   , parse
-  , Source(..)
+  , Source (..)
   )
 where
 
-import Language.MantLe.Lexer (Source(..))
 import Control.Monad.State
+import Language.MantLe.Lexer (Source (..))
 import Language.MantLe.Parser.Expr.Types
 import Language.MantLe.Parser.Statements.Binding
 import Language.MantLe.Parser.Statements.Class
