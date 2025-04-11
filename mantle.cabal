@@ -41,6 +41,7 @@ common depends
         , aeson
         , base
         , bytestring
+        , filepath
         , interpolate
         , mtl
         , parsec
@@ -56,6 +57,8 @@ common warnings
 
 common modules
     other-modules:
+        Language.MantLe.Backend.Interpreter
+        Language.MantLe.Backend.Loader
         Language.MantLe.Backend.MMA.Codegen
         Language.MantLe.Backend.MMA.Types
         Language.MantLe.Lexer
