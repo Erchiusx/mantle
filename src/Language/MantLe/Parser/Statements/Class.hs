@@ -16,6 +16,7 @@ data Class
   , functions :: [Declare] -- accompanied functions
   , relations :: [Equation.Equation]
   }
+  deriving (Show, Eq)
 
 instance Statement Class where
   expect = try $ do

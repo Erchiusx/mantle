@@ -76,12 +76,12 @@ instance IsString Symbol where
   fromString "::" = Type'Note
   fromString "<-" = Bind'to
   fromString "=>" = Constraint'symbol
-  fromString "(" = Paren Round False
-  fromString ")" = Paren Round True
-  fromString "[" = Paren Bracket False
-  fromString "]" = Paren Bracket True
-  fromString "{" = Paren Brace False
-  fromString "}" = Paren Brace True
+  fromString "(" = Paren Round Open
+  fromString ")" = Paren Round Close
+  fromString "[" = Paren Bracket Open
+  fromString "]" = Paren Bracket Close
+  fromString "{" = Paren Brace Open
+  fromString "}" = Paren Brace Close
   fromString "." = Dot
   fromString "|" = Branch
   fromString "->" = Map'to

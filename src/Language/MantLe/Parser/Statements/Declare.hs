@@ -14,7 +14,7 @@ data Declare = Declare
 
 instance Statement Declare where
   expect = try $ do
-    name@(T.Identifier _) <- binding'name
+    name <- binding'name
     T.Symbol T.Type'Note <- anyToken
     type'expr' <- type'expr
     return $ Declare name type'expr'

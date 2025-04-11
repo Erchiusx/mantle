@@ -11,15 +11,17 @@ data Data
   { name :: T.Token
   , branch :: [Branch]
   }
+  deriving (Show, Eq)
 
 data Branch
   = Branch
   { name :: T.Token
   , types :: [Type'Expr]
   }
+  deriving (Show, Eq)
 
 instance Statement Data where
-  expect = do
+  expect = try $ do
     T.Keyword T.Data <- anyToken
     name@(T.Identifier _) <- anyToken
     T.Layout T.Indent <- anyToken
@@ -28,7 +30,7 @@ instance Statement Data where
     return $ Data name branch
 
 instance Statement Branch where
-  expect = do
+  expect = try $ do
     name@(T.Identifier _) <- anyToken
     T.Keyword T.Of <- anyToken
     types <-

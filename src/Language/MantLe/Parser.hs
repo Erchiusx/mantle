@@ -4,6 +4,7 @@ module Language.MantLe.Parser
   , MState
   , create'var
   , eval
+  , Use'State (..)
   )
 where
 
@@ -19,15 +20,16 @@ import Language.MantLe.Parser.Statements.Instance
 import Language.MantLe.Parser.Statements.Object
 import Language.MantLe.Parser.Types
   ( Parser
-  , Statement (..)
+  , Statement (..), parallel
   )
 import Language.MantLe.Types
-import Text.Parsec (choice, many)
+import Text.Parsec (choice, many, optional)
 
 import Data.List (findIndex)
 import Data.Maybe (fromJust)
 import Data.Semigroup (Max (..))
 import Data.String.Interpolate (i)
+import Data.These
 
 data Stmt
   = Stmt
@@ -40,6 +42,27 @@ data Stmt
   , imports :: [Import]
   , objects :: [Object]
   }
+  deriving (Eq)
+
+instance Show Stmt where
+  show Stmt{..} =
+      [i|(Stmt {
+        bindings:
+          #{show bindings}
+        classes:
+          #{show classes}
+        datatypes:
+          #{show datatypes}
+        declares:
+          #{show declares}
+        equations:
+          #{show equations}
+        instances:
+          #{show instances}
+        imports:
+          #{show imports}
+      })
+      |]
 
 class ToStmt a where
   toStmt :: a -> Stmt
@@ -83,7 +106,7 @@ file :: Parser u Stmt
 file =
   mconcat <$> do
     many $
-      choice $
+      choice
         [ toStmt <$> expect @Import
         , toStmt <$> expect @Object
         , toStmt <$> expect @Class
@@ -92,14 +115,16 @@ file =
         , toStmt <$> expect @Declare
         , toStmt <$> expect @Binding
         , toStmt <$> expect @Equation
-        ]
+        ] <* optional parallel
 
 data Use'State
   = Use'State
   { name'state :: Stmt
   , mma'state :: Integer
   , module'name :: String
+  , mma'vars :: [Binding]
   }
+  deriving (Show, Eq)
 
 type MState = State Use'State
 
@@ -119,6 +144,7 @@ create'var (Val'Var a) = do
   put
     origin
       { mma'state = mma'state'
+      , mma'vars = bind : mma'vars
       , name'state =
           name'state{bindings = bind : name'state.bindings}
       }
@@ -166,10 +192,31 @@ eval (Val'Formula os vs) = do
             : rail'
         )
     )
--- about types
+-- type signal
 eval (Val'Sig v _) = eval v
-eval (Val'Let _ _) = undefined
-eval (Val'Match _ _) = undefined
+-- let-in
+eval (Val'Let [] v) = eval v
+eval (Val'Let ((p, x') : bs) v) = do
+  x <- eval x'
+  t <- get'expr'type x
+  case p of
+    Pattern (This name@(Identifier _)) -> do
+      modify $ bindname name x
+      eval $ Val'Let bs v
+    Pattern (That (name, ps)) -> do
+      t' <- get'branch'type name
+      case t' == t of
+        True -> undefined
+        False -> error ""
+    Pattern (These name (branch, ps)) -> do
+      modify $ bindname name x
+      eval
+        ( Val'Let ((Pattern (That (branch, ps)), x') : bs) v
+        )
+    Pattern _ -> undefined
+-- case-of
+eval (Val'Match v []) = undefined
+eval (Val'Match v ((p, v') : rest)) = undefined
 
 fixty :: Token -> Int
 fixty (Operator (s : _)) =
@@ -183,3 +230,19 @@ fixty (Operator (s : _)) =
       , "&="
       , "<>"
       ]
+
+bindname
+  :: Token -> Val'Expr -> Use'State -> Use'State
+bindname n v s =
+  s
+    { name'state =
+        s.name'state
+          { bindings = Binding n v : s.name'state.bindings
+          }
+    }
+
+get'expr'type :: Val'Expr -> MState Type'Expr
+get'expr'type = undefined
+
+get'branch'type :: Token -> MState Type'Expr
+get'branch'type = undefined

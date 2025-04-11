@@ -65,7 +65,7 @@ data Type'Expr
       Type'Expr
   deriving (Show, Eq)
 
-data Pattern
+newtype Pattern
   = Pattern
       ( These
           Token -- alias

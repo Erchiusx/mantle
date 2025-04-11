@@ -13,6 +13,7 @@ data Instance
   , types :: [ET.Type'Expr]
   , functions :: [Binding.Binding]
   }
+  deriving (Show, Eq)
 
 instance Statement Instance where
   expect = try $ do
