@@ -61,6 +61,7 @@ common modules
         Language.MantLe.Backend.Loader
         Language.MantLe.Backend.MMA.Codegen
         Language.MantLe.Backend.MMA.Types
+        Language.MantLe.Backend.Typecheck
         Language.MantLe.Lexer
         Language.MantLe.Math
         Language.MantLe.Parser

@@ -12,21 +12,11 @@ import Data.Maybe (fromJust)
 import Data.Semigroup (Max (Max, getMax))
 import Data.String.Interpolate (i)
 import Data.These
+import Language.MantLe.Backend.Typecheck
 import Language.MantLe.Parser
 import Language.MantLe.Parser.Expr.Types
 import Language.MantLe.Parser.Statements.Binding
 import Language.MantLe.Types
-
-data Use'State
-  = Use'State
-  { name'state :: Stmt
-  , mma'state :: Integer
-  , module'name :: String
-  , mma'vars :: [Binding]
-  }
-  deriving (Show, Eq)
-
-type MState = State Use'State
 
 locate :: Token -> [Binding] -> Maybe Binding
 locate _ [] = Nothing
@@ -92,13 +82,14 @@ eval (Val'Formula os vs) = do
             : rail'
         )
     )
+-- TODO: deal with types
 -- type signal
 eval (Val'Sig v _) = eval v
 -- let-in
 eval (Val'Let [] v) = eval v
 eval (Val'Let ((p, x') : bs) v) = do
   x <- eval x'
-  t <- get'expr'type x
+  t <- type'check x
   case p of
     Pattern (This name@(Identifier _)) -> do
       modify $ bindname name x
@@ -141,8 +132,6 @@ bindname n v s =
           }
     }
 
-get'expr'type :: Val'Expr -> MState Type'Expr
-get'expr'type = undefined
-
-get'branch'type :: Token -> MState Type'Expr
+get'branch'type
+  :: Token -> MState Type'Expr
 get'branch'type = undefined
