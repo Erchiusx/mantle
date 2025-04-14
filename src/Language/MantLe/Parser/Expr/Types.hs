@@ -79,7 +79,7 @@ data Constraint
       [Type'Expr]
   deriving (Show, Eq)
 
-paren'enclosed :: Parser u a -> Parser u a
+paren'enclosed :: Parser a -> Parser a
 paren'enclosed p = do
   Symbol (Paren paren'type Open) <- anyToken
   res <- p
@@ -88,7 +88,7 @@ paren'enclosed p = do
     <?> "unmatched parens"
   return res
 
-enclosed :: Paren'Type -> Parser u a -> Parser u a
+enclosed :: Paren'Type -> Parser a -> Parser a
 t `enclosed` p = do
   Symbol (Paren t' False) <- anyToken
   guard (t' == t)

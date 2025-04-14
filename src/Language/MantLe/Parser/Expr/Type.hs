@@ -16,7 +16,7 @@ import Text.Parsec
   , (<|>)
   )
 
-type'expr :: Parser u Type'Expr
+type'expr :: Parser Type'Expr
 type'expr =
   choice $
     map try $
@@ -27,7 +27,7 @@ type'expr =
       , pVar
       ]
 
-type'expr'nofn :: Parser u Type'Expr
+type'expr'nofn :: Parser Type'Expr
 type'expr'nofn =
   choice $
     map try $
@@ -37,19 +37,19 @@ type'expr'nofn =
       , pSimpleType
       ]
 
-pVar :: Parser u Type'Expr
+pVar :: Parser Type'Expr
 pVar = do
   Identifier name <- anyToken
   return $ Type'Var $ Identifier name
 
-pFn :: Parser u Type'Expr
+pFn :: Parser Type'Expr
 pFn = do
   t1 <- pSimpleType
   Symbol Map'to <- anyToken
   t2 <- type'expr
   pure (Type'Fn t1 t2)
 
-pForall :: Parser u Type'Expr
+pForall :: Parser Type'Expr
 pForall = do
   Keyword Forall <- anyToken
   typeVars <- many $ try $ do
@@ -60,7 +60,7 @@ pForall = do
   typ <- type'expr
   return $ Type'Forall typeVars constraints typ
 
-pExists :: Parser u Type'Expr
+pExists :: Parser Type'Expr
 pExists = do
   Keyword Exists <- anyToken
   typeVars <- many $ try $ do
@@ -71,7 +71,7 @@ pExists = do
   typ <- type'expr
   return $ Type'Exists typeVars constraints typ
 
-pConstraints :: Parser u [Constraint]
+pConstraints :: Parser [Constraint]
 pConstraints = many $ try $ do
   Symbol Dot <- anyToken
   Identifier classname <- anyToken
@@ -79,16 +79,16 @@ pConstraints = many $ try $ do
   return $
     Constraint (Identifier classname) types
 
-pADT :: Parser u Type'Expr
+pADT :: Parser Type'Expr
 pADT = do
   t1 <- pSimpleType
   t2 <- pSimpleType
   pure (Type'App t1 t2)
 
-pSimpleType :: Parser u Type'Expr
+pSimpleType :: Parser Type'Expr
 pSimpleType = try pVar <|> parens type'expr
 
-parens :: Parser u a -> Parser u a
+parens :: Parser a -> Parser a
 parens p = do
   Symbol (Paren Round False) <- anyToken
   x <- p

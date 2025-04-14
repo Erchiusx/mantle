@@ -9,14 +9,14 @@ import Text.Parsec
   )
 
 period
-  :: Parser u a -> Parser u ((SourcePos, SourcePos), a)
+  :: Parser a -> Parser ((SourcePos, SourcePos), a)
 period p = do
   pos <- getPosition
   res <- p
   pos' <- getPosition
   return ((pos, pos'), res)
 
-dot :: Parser u ()
+dot :: Parser ()
 dot = do
   Symbol Dot <- anyToken
   return ()

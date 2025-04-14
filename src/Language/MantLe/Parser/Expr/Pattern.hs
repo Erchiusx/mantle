@@ -12,7 +12,7 @@ import Text.Parsec
   , (<|>)
   )
 
-pattern' :: Parser u Pattern
+pattern' :: Parser Pattern
 pattern' =
   choice $
     map try' $
@@ -21,7 +21,7 @@ pattern' =
       , name
       ]
 
-try' :: Parser u a -> Parser u a
+try' :: Parser a -> Parser a
 try' p = enclosed <|> try p
  where
   enclosed = try $ do
@@ -30,12 +30,12 @@ try' p = enclosed <|> try p
     Symbol (Paren Round Close) <- anyToken
     return res
 
-name :: Parser u Pattern
+name :: Parser Pattern
 name = do
   Identifier name' <- anyToken
   return . Pattern . This . Identifier $ name'
 
-branch :: Parser u Pattern
+branch :: Parser Pattern
 branch = do
   Symbol (Paren Round Open) <- anyToken
   Identifier branch'name <- anyToken
@@ -44,7 +44,7 @@ branch = do
   return . Pattern $
     That (Identifier branch'name, patterns)
 
-syn :: Parser u Pattern
+syn :: Parser Pattern
 syn = do
   Pattern (This name') <- name
   Symbol TApp <- anyToken

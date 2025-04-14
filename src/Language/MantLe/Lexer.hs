@@ -7,7 +7,7 @@ import Control.Applicative (Alternative ((<|>)))
 import Control.Monad (guard)
 import Control.Monad.State
 import Data.Char (isLetter)
-import Data.List (isPrefixOf)
+import Data.List (find, isPrefixOf)
 import Data.String (IsString (..))
 import Language.MantLe.Types
 import Text.Parsec (Stream (uncons))
@@ -49,7 +49,9 @@ lex'keyword s = do
         , "instance"
         ]
           :: [(String, Keyword)]
-  try'prefix keywords s Keyword
+  (Identifier name, rest) <- lex'identifier s
+  (_, res) <- find ((== name) . fst) keywords
+  return (Keyword res, rest)
 
 lex'symbol :: String -> Maybe (Token, Source)
 lex'symbol s = do
@@ -92,7 +94,10 @@ lex'comment s = do
   '-' : '-' : rest <- Just s
   let (comment, rest') = break (== '\n') rest
   return $
-    (Comment comment, Source $ rest')
+    (Comment comment, Source $ strip rest')
+ where
+  strip :: String -> String
+  strip = dropWhile (== '\n')
 
 lex'math :: String -> Maybe (Token, Source)
 lex'math s = do

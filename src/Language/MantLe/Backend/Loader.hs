@@ -1,9 +1,15 @@
 module Language.MantLe.Backend.Loader where
 
 import Control.Exception (try)
+import Data.Monoid (Dual (..))
 import Data.String.Interpolate (i)
-import Language.MantLe.Backend.Interpreter
 import Language.MantLe.Parser
+import Language.MantLe.Parser.Expr.Types
+import Language.MantLe.Parser.Statements.Class
+import Language.MantLe.Parser.Statements.Data
+  ( Data
+  )
+import Language.MantLe.Parser.Statements.Declare
 import Language.MantLe.Parser.Statements.Import
 import Language.MantLe.Types (Token (Identifier))
 import System.Environment
@@ -37,9 +43,31 @@ load'module Import{mod} = do
   case module'content' of
     Left e -> return $ ([FSError e], mempty)
     Right module'content ->
-      case parse file () module'name $ Source module'content of
-        (Left e, _) -> return $ ([LexError e], mempty)
-        (Right module', _) -> return $ return $ module'
+      case parse file module'name $ Source module'content of
+        Left e -> return $ ([LexError e], mempty)
+        Right module' -> return $ return $ preprocess module'
+
+preprocess :: Stmt -> Stmt
+preprocess s@Stmt{..} =
+  let declares' =
+        getDual $ mconcat $ map (Dual . quantify) classes
+   in s
+        { declares = declares' <> declares
+        }
+
+quantify :: Class -> [Declare]
+quantify Class{..} =
+  map quantify' functions
+ where
+  quantify' :: Declare -> Declare
+  quantify' d =
+    d
+      { datatype =
+          Type'Forall
+            types
+            [Constraint name $ map Type'Var types]
+            d.datatype
+      }
 
 load'module'rec :: Import -> IO Import'Result
 load'module'rec i = do
@@ -49,8 +77,7 @@ load'module'rec i = do
       let
         imports = s.imports
         loaded's = traverse id $ map load'module imports
-        result = traverse id <$> loaded's
-      (es, stmts) <- result
-      let stmt = mconcat stmts
-      return (es, s <> stmt)
+      results <- loaded's
+      let (es, s) = traverse id $ results
+      return $ (es, mconcat s)
     (es, s) -> return $ (es, s)

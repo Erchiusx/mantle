@@ -103,7 +103,7 @@ instance Semigroup Stmt where
 instance Monoid Stmt where
   mempty = Stmt [] [] [] [] [] [] [] []
 
-file :: Parser u Stmt
+file :: Parser Stmt
 file =
   mconcat <$> do
     many $

@@ -19,7 +19,7 @@ instance Statement Binding where
     val'expr' <- val'expr
     return $ Binding name val'expr'
    where
-    binding'name :: Parser u T.Token
+    binding'name :: Parser T.Token
     binding'name =
       choice $
         map try $

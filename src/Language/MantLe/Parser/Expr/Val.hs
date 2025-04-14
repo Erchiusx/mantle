@@ -17,7 +17,7 @@ import Text.Parsec
   , (<|>)
   )
 
-val'expr' :: Parser u Val'Expr
+val'expr' :: Parser Val'Expr
 val'expr' =
   choice $
     map try $
@@ -29,7 +29,7 @@ val'expr' =
       , p'plain
       ]
 
-p'let'in :: Parser u Val'Expr
+p'let'in :: Parser Val'Expr
 p'let'in = do
   Keyword Let <- anyToken
   Layout Indent <- anyToken
@@ -39,14 +39,14 @@ p'let'in = do
   value <- may'indent val'expr
   return $ Val'Let (bindings) value
 
-binding :: Parser u (Pattern, Val'Expr)
+binding :: Parser (Pattern, Val'Expr)
 binding = do
   p <- pattern'
   Symbol Bind'to <- anyToken
   value <- val'expr
   return (p, value)
 
-p'case'of :: Parser u Val'Expr
+p'case'of :: Parser Val'Expr
 p'case'of = do
   Keyword Case <- anyToken
   value <- val'expr
@@ -56,14 +56,14 @@ p'case'of = do
   Layout Exdent <- anyToken
   return $ Val'Match value branches
 
-branch :: Parser u (Pattern, Val'Expr)
+branch :: Parser (Pattern, Val'Expr)
 branch = do
   p <- pattern'
   Symbol Map'to <- anyToken
   value <- val'expr
   return (p, value)
 
-p'lambda :: Parser u Val'Expr
+p'lambda :: Parser Val'Expr
 p'lambda = do
   Symbol Lambda <- anyToken
   p <- pattern'
@@ -71,20 +71,20 @@ p'lambda = do
   value <- val'expr
   return $ Val'Lam p value
 
-p'type'application :: Parser u Val'Expr
+p'type'application :: Parser Val'Expr
 p'type'application = do
   value <- p'plain
   Symbol TApp <- anyToken
   type' <- type'expr
   return $ Val'Sig value type'
 
-p'application :: Parser u Val'Expr
+p'application :: Parser Val'Expr
 p'application = do
   f <- component
   rest <- many1 component
   return $ foldl' Val'App f rest
 
-component :: Parser u Val'Expr
+component :: Parser Val'Expr
 component =
   choice $
     map try $
@@ -92,7 +92,7 @@ component =
       , p'plain
       ]
 
-p'plain :: Parser u Val'Expr
+p'plain :: Parser Val'Expr
 p'plain = do
   t <- anyToken
   case t of
@@ -100,12 +100,12 @@ p'plain = do
     Identifier _ -> return $ Val'Var t
     _ -> fail "error parsing expression"
 
-any'operator :: Parser u Token
+any'operator :: Parser Token
 any'operator = do
   o@(Operator _) <- anyToken
   return o
 
-fcomponent :: Parser u Val'Expr
+fcomponent :: Parser Val'Expr
 fcomponent =
   choice $
     map try $
@@ -114,7 +114,7 @@ fcomponent =
       , p'plain
       ]
 
-val'expr :: Parser u Val'Expr
+val'expr :: Parser Val'Expr
 val'expr =
   ( try $ do
       co <- many1 $ try $ do

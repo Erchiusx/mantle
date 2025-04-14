@@ -7,7 +7,13 @@ import Language.MantLe.Parser.Types
   , parallel
   )
 import Language.MantLe.Types qualified as T
-import Text.Parsec (anyToken, many, sepBy, try)
+import Text.Parsec
+  ( anyToken
+  , many
+  , optional
+  , sepBy
+  , try
+  )
 
 data Class
   = Class
@@ -27,7 +33,7 @@ instance Statement Class where
       return $ T.Identifier name
     T.Layout T.Indent <- anyToken
     functions <-
-      try (expect @Declare) `sepBy` parallel
+      many . try $ expect @Declare <* optional parallel
     T.Layout layout <- anyToken
     case layout of
       T.Exdent -> return $ Class types name functions []

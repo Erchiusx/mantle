@@ -8,6 +8,7 @@ module Language.MantLe.Types
   , Layout (..)
   , pattern Open
   , pattern Close
+  , is'comment
   )
 where
 
@@ -23,6 +24,10 @@ data Token
   | Symbol Symbol
   | Layout Layout
   deriving (Eq, Show)
+
+is'comment :: Token -> Bool
+is'comment (Comment _) = True
+is'comment _ = False
 
 type Raw'mma = String
 

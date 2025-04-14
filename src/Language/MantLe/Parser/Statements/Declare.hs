@@ -19,7 +19,7 @@ instance Statement Declare where
     type'expr' <- type'expr
     return $ Declare name type'expr'
    where
-    binding'name :: Parser u T.Token
+    binding'name :: Parser T.Token
     binding'name =
       choice $
         map try $
